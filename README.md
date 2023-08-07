@@ -14,9 +14,13 @@
 1. Последовательная отправка файлов различного размера.
 
 BenchmarkDotNet v0.13.6, Windows 10 (10.0.19045.3208/22H2/2022Update)
+
 AMD Ryzen 5 5600X, 1 CPU, 12 logical and 6 physical cores
+
 .NET SDK 7.0.202
+
   [Host]   : .NET 5.0.17 (5.0.1722.21314), X64 RyuJIT AVX2
+  
   .NET 7.0 : .NET 7.0.4 (7.0.423.11508), X64 RyuJIT AVX2
 
 Job=.NET 7.0  Runtime=.NET 7.0  
