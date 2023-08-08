@@ -14,9 +14,13 @@
 1. Последовательная отправка файлов различного размера.
 
 BenchmarkDotNet v0.13.6, Windows 10 (10.0.19045.3208/22H2/2022Update)
+
 AMD Ryzen 5 5600X, 1 CPU, 12 logical and 6 physical cores
+
 .NET SDK 7.0.202
+
   [Host]   : .NET 5.0.17 (5.0.1722.21314), X64 RyuJIT AVX2
+  
   .NET 7.0 : .NET 7.0.4 (7.0.423.11508), X64 RyuJIT AVX2
 
 Job=.NET 7.0  Runtime=.NET 7.0  
@@ -57,8 +61,8 @@ Job=.NET 7.0  Runtime=.NET 7.0
 ## Conclusions
 1. Web API through HTTP/2 works slower for all tasks except parallel sending where it shows the same performance as HTTP/1.1.
 1. GRPC is 5% faster than Web API in sending short sequenced requests, like sending log records.
-1. GRPC is 40% faster than Web API in sending short parallel requests. GRPC на 40% быстрее, чем Web API при отправке коротких параллельных запросов.
-1. GRPC is 6% slower than Web API in sequenced sending 1 KiB files. GRPC на 6% медленнее, чем Web API при последовательной отправке файлов размером 1 КБ.
+1. GRPC is 40% faster than Web API in sending short parallel requests.
+1. GRPC is 6% slower than Web API in sequenced sending 1 KiB files.
 1. GRPC is 20-30% faster than Web API in sequenced sending files of 1-100 MiB.
 
 Besides this results, it is needed to be taken into account that GRPC uses binary serialization what can be valuable advantage for reducing network traffic. 
