@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
-using BenchmarkJsonApiVsGrpc.WebApp;
+using BenchmarkWebApiVsGrpc.WebApp;
 using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
 
@@ -47,7 +47,7 @@ namespace BenchmarkWebApiVsGrpc.TestApp
         private byte[][] _binaryData;
 
         [Benchmark(Baseline = true)]
-        public async Task<HttpResponseMessage> JsonApiHttp1Async()
+        public async Task<HttpResponseMessage> WebApiHttp1Async()
         {
             var i = Interlocked.Increment(ref _index);
             var buf = _binaryData[i % 20];
@@ -60,7 +60,7 @@ namespace BenchmarkWebApiVsGrpc.TestApp
         }
 
         [Benchmark]
-        public async Task<HttpResponseMessage> JsonApiHttp2Async()
+        public async Task<HttpResponseMessage> WebApiHttp2Async()
         {
             var i = Interlocked.Increment(ref _index);
             var buf = _binaryData[i % 20];

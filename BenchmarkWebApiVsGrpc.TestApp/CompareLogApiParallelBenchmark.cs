@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
-using BenchmarkJsonApiVsGrpc.WebApp;
+using BenchmarkWebApiVsGrpc.WebApp;
 using Google.Protobuf.WellKnownTypes;
 
 namespace BenchmarkWebApiVsGrpc.TestApp
@@ -34,7 +34,7 @@ namespace BenchmarkWebApiVsGrpc.TestApp
         private int _index = 0;
 
         [Benchmark(Baseline = true, OperationsPerInvoke = 20)]
-        public async Task<HttpResponseMessage[]> JsonApiHttp1Async()
+        public async Task<HttpResponseMessage[]> WebApiHttp1Async()
         {
             var client = _httpClientV1;
             return await Task.WhenAll(Enumerable.Range(0, 20).Select(e => Task.Run(async () =>
@@ -53,7 +53,7 @@ namespace BenchmarkWebApiVsGrpc.TestApp
         }
 
         [Benchmark(OperationsPerInvoke = 20)]
-        public async Task<HttpResponseMessage[]> JsonApiHttp2Async()
+        public async Task<HttpResponseMessage[]> WebApiHttp2Async()
         {
             var client = _httpClientV2;
             return await Task.WhenAll(Enumerable.Range(0, 20).Select(e => Task.Run(async () =>

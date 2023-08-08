@@ -2,7 +2,7 @@
 using System;
 using System.Net.Http;
 using System.Net;
-using BenchmarkJsonApiVsGrpc.WebApp;
+using BenchmarkWebApiVsGrpc.WebApp;
 
 namespace BenchmarkWebApiVsGrpc.TestApp
 {

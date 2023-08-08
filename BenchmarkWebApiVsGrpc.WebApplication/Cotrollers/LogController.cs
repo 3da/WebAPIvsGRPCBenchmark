@@ -8,9 +8,9 @@ namespace BenchmarkWebApiVsGrpc.WebApp.Cotrollers
     [ApiController]
     public class LogController : ControllerBase
     {
-        private readonly JsonApiLogger _logger;
+        private readonly WebApiLogger _logger;
 
-        public LogController(JsonApiLogger logger)
+        public LogController(WebApiLogger logger)
         {
             _logger = logger;
         }

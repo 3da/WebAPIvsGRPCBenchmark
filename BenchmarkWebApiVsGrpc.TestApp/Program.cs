@@ -2,7 +2,7 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Running;
-using BenchmarkJsonApiVsGrpc.WebApp;
+using BenchmarkWebApiVsGrpc.WebApp;
 using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
 

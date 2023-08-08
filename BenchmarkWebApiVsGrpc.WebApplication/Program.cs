@@ -27,10 +27,10 @@ namespace BenchmarkWebApiVsGrpc.WebApp
             });
 
             builder.Services.AddSingleton<GrpcLogger>()
-                .AddSingleton<JsonApiLogger>();
+                .AddSingleton<WebApiLogger>();
 
             builder.Services.AddHostedService(q => q.GetRequiredService<GrpcLogger>());
-            builder.Services.AddHostedService(q => q.GetRequiredService<JsonApiLogger>());
+            builder.Services.AddHostedService(q => q.GetRequiredService<WebApiLogger>());
 
             builder.Services.AddControllers();
             builder.Services.AddGrpc(q =>

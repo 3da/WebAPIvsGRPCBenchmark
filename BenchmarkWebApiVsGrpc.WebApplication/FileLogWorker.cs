@@ -47,9 +47,9 @@ namespace BenchmarkWebApiVsGrpc.WebApp
         }
     }
 
-    public class JsonApiLogger : FileLogWorker
+    public class WebApiLogger : FileLogWorker
     {
-        public JsonApiLogger() : base("JSONLog.txt")
+        public WebApiLogger() : base("JSONLog.txt")
         {
         }
     }

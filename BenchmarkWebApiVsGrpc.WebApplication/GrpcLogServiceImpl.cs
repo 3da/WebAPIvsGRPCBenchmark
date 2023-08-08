@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System;
 using System.Threading.Tasks;
-using BenchmarkJsonApiVsGrpc.WebApp;
+using BenchmarkWebApiVsGrpc.WebApp;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 
