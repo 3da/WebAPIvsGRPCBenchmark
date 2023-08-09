@@ -1,4 +1,5 @@
 using System.Net;
+using BenchmarkWebApiVsGrpc.WebApp.Db;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,6 +29,8 @@ namespace BenchmarkWebApiVsGrpc.WebApp
 
             builder.Services.AddSingleton<GrpcLogger>()
                 .AddSingleton<WebApiLogger>();
+
+            builder.Services.AddSingleton<UserRepository>();
 
             builder.Services.AddHostedService(q => q.GetRequiredService<GrpcLogger>());
             builder.Services.AddHostedService(q => q.GetRequiredService<WebApiLogger>());

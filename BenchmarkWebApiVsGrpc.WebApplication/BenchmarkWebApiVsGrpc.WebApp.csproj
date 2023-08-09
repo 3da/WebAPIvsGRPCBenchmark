@@ -15,6 +15,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\BenchmarkWebApiVsGrpc.CommonLib\BenchmarkWebApiVsGrpc.CommonLib.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<Protobuf Include="service.proto" GrpcServices="Service" />
 	</ItemGroup>
 

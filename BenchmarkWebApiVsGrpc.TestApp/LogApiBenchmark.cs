@@ -15,7 +15,7 @@ namespace BenchmarkWebApiVsGrpc.TestApp
     [MarkdownExporter]
     [HtmlExporter]
     [MemoryDiagnoser]
-    public class CompareLogApiBenchmark
+    public class LogApiBenchmark
     {
         private HttpClient _httpClientV2;
         private HttpClient _httpClientV1;

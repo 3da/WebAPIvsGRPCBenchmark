@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Running;
 using BenchmarkWebApiVsGrpc.WebApp;
 using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
+using Grpc.Core;
 
 namespace BenchmarkWebApiVsGrpc.TestApp
 {
@@ -14,9 +16,11 @@ namespace BenchmarkWebApiVsGrpc.TestApp
         {
             await TestAsync();
 
-            BenchmarkRunner.Run<CompareLogApiBenchmark>();
-            BenchmarkRunner.Run<CompareLogApiParallelBenchmark>();
-            BenchmarkRunner.Run<CompareFileApiBenchmark>();
+            //BenchmarkRunner.Run<CompareLogApiBenchmark>();
+            //BenchmarkRunner.Run<CompareLogApiParallelBenchmark>();
+            //BenchmarkRunner.Run<CompareFileApiBenchmark>();
+            //BenchmarkRunner.Run<FileApiParallelBenchmark>();
+            BenchmarkRunner.Run<UserApiParallelBenchmark>();
         }
 
         private static async Task TestAsync()
@@ -26,6 +30,14 @@ namespace BenchmarkWebApiVsGrpc.TestApp
             var test = await client.HttpClientV2.GetAsync("/api/log");
 
             var testStr = await test.Content.ReadAsStringAsync();
+
+            var users = await client.HttpClientV1.GetStringAsync("/api/User/getpage?page=10&size=100");
+
+            var users2 = await client.GrpcClient.Users(new UserRequest()
+            {
+                Page = 10,
+                PageSize = 100
+            }).ResponseStream.ReadAllAsync().Take(100).ToArrayAsync();
 
 
             for (int i = 0; i < 10; i++)

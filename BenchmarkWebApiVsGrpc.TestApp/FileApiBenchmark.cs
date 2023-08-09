@@ -17,14 +17,14 @@ namespace BenchmarkWebApiVsGrpc.TestApp
     [MarkdownExporter]
     [HtmlExporter]
     [MemoryDiagnoser]
-    public class CompareFileApiBenchmark
+    public class FileApiBenchmark
     {
         private HttpClient _httpClientV2;
         private HttpClient _httpClientV1;
         private GrpcLogService.GrpcLogServiceClient _grpcClient;
 
-        [Params(1024, 1024 * 1024, 1024 * 1024 * 10, 1024 * 1024 * 100)]
-        public int FileSize;
+        [Params(1, 1024, 1024 * 10, 1024 * 100)]
+        public int FileSize; //In KiB
 
         [GlobalSetup]
         public void Setup()
@@ -32,7 +32,7 @@ namespace BenchmarkWebApiVsGrpc.TestApp
             var rand = new Random();
             _binaryData = Enumerable.Range(0, 20).Select(_ =>
             {
-                var buf = new byte[FileSize];
+                var buf = new byte[FileSize * 1024];
                 rand.NextBytes(buf);
                 return buf;
             }).ToArray();
@@ -79,7 +79,7 @@ namespace BenchmarkWebApiVsGrpc.TestApp
             var buf = _binaryData[i % 20];
             return await _grpcClient.FileAsync(new BinMessage
             {
-                Data = ByteString.CopyFrom(buf),
+                Data = UnsafeByteOperations.UnsafeWrap(buf),
                 Title = "File" + i
             });
         }

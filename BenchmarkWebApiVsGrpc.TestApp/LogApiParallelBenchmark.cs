@@ -16,8 +16,9 @@ namespace BenchmarkWebApiVsGrpc.TestApp
     [MarkdownExporter]
     [HtmlExporter]
     [MemoryDiagnoser]
-    public class CompareLogApiParallelBenchmark
+    public class LogApiParallelBenchmark
     {
+        const int OperationsPerInvoke = 20;
         private HttpClient _httpClientV2;
         private HttpClient _httpClientV1;
         private GrpcLogService.GrpcLogServiceClient _grpcClient;
@@ -33,11 +34,11 @@ namespace BenchmarkWebApiVsGrpc.TestApp
 
         private int _index = 0;
 
-        [Benchmark(Baseline = true, OperationsPerInvoke = 20)]
+        [Benchmark(Baseline = true, OperationsPerInvoke = OperationsPerInvoke)]
         public async Task<HttpResponseMessage[]> WebApiHttp1Async()
         {
             var client = _httpClientV1;
-            return await Task.WhenAll(Enumerable.Range(0, 20).Select(e => Task.Run(async () =>
+            return await Task.WhenAll(Enumerable.Range(0, OperationsPerInvoke).Select(e => Task.Run(async () =>
             {
                 var i = Interlocked.Increment(ref _index);
                 var formData = new MultipartFormDataContent
@@ -52,11 +53,12 @@ namespace BenchmarkWebApiVsGrpc.TestApp
 
         }
 
-        [Benchmark(OperationsPerInvoke = 20)]
+        [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
         public async Task<HttpResponseMessage[]> WebApiHttp2Async()
         {
             var client = _httpClientV2;
-            return await Task.WhenAll(Enumerable.Range(0, 20).Select(e => Task.Run(async () =>
+
+            return await Task.WhenAll(Enumerable.Range(0, OperationsPerInvoke).Select(e => Task.Run(async () =>
             {
                 var i = Interlocked.Increment(ref _index);
                 var formData = new MultipartFormDataContent
@@ -71,11 +73,11 @@ namespace BenchmarkWebApiVsGrpc.TestApp
             })));
         }
 
-        [Benchmark(OperationsPerInvoke = 20)]
+        [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
         public async Task<Empty[]> GrpcHttp2Async()
         {
             var client = _grpcClient;
-            return await Task.WhenAll(Enumerable.Range(0, 20).Select(e => Task.Run(async () =>
+            return await Task.WhenAll(Enumerable.Range(0, OperationsPerInvoke).Select(e => Task.Run(async () =>
             {
                 var i = Interlocked.Increment(ref _index);
                 return await client.LogAsync(new LogMessage

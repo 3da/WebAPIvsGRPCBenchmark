@@ -6,8 +6,9 @@ using BenchmarkWebApiVsGrpc.WebApp;
 
 namespace BenchmarkWebApiVsGrpc.TestApp
 {
-    internal class ApiClient
+    internal class ApiClient : IDisposable
     {
+        private readonly GrpcChannel _channel;
         public HttpClient HttpClientV2 { get; }
         public HttpClient HttpClientV1 { get; }
         public GrpcLogService.GrpcLogServiceClient GrpcClient { get; }
@@ -31,8 +32,15 @@ namespace BenchmarkWebApiVsGrpc.TestApp
                 DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact
             };
 
-            var channel = GrpcChannel.ForAddress(addressV2);
-            GrpcClient = new GrpcLogService.GrpcLogServiceClient(channel);
+            _channel = GrpcChannel.ForAddress(addressV2);
+            GrpcClient = new GrpcLogService.GrpcLogServiceClient(_channel);
+        }
+
+        public void Dispose()
+        {
+            _channel.Dispose();
+            HttpClientV2.Dispose();
+            HttpClientV1.Dispose();
         }
     }
 }

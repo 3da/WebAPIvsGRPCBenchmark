@@ -8,6 +8,7 @@ service GrpcLogService
 {
 	rpc Log(LogMessage) returns (google.protobuf.Empty) {}
 	rpc File(BinMessage) returns (google.protobuf.Empty) {}
+	rpc Users(UserRequest) returns (stream User) {}
 }
 
 message LogMessage
@@ -22,4 +23,19 @@ message BinMessage
 {
 	string title = 1;
 	bytes data = 2;
+}
+
+message User
+{
+	string userName = 1;
+	string email = 2;
+	int32 age = 3;
+	string address = 4;
+	google.protobuf.Timestamp createDateTime = 5;
+}
+
+message UserRequest
+{
+	int32 page = 1;
+	int32 pageSize = 2;
 }

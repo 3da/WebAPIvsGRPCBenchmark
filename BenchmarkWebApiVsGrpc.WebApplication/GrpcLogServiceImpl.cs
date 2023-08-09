@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System;
 using System.Threading.Tasks;
-using BenchmarkWebApiVsGrpc.WebApp;
+using BenchmarkWebApiVsGrpc.WebApp.Db;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 
@@ -10,10 +10,12 @@ namespace BenchmarkWebApiVsGrpc.WebApp
     public class GrpcLogServiceImpl : GrpcLogService.GrpcLogServiceBase
     {
         private readonly GrpcLogger _logger;
+        private readonly UserRepository _userRepository;
 
-        public GrpcLogServiceImpl(GrpcLogger logger)
+        public GrpcLogServiceImpl(GrpcLogger logger, UserRepository userRepository)
         {
             _logger = logger;
+            _userRepository = userRepository;
         }
 
         public override async Task<Empty> Log(LogMessage request, ServerCallContext context)
@@ -32,6 +34,21 @@ namespace BenchmarkWebApiVsGrpc.WebApp
             await _logger.EnqueueAsync($"{DateTime.UtcNow:O} [0] Received file \"{request.Title}\" with md5 hash: {hashStr}");
 #endif
             return new Empty();
+        }
+
+        public override async Task Users(UserRequest request, IServerStreamWriter<User> responseStream, ServerCallContext context)
+        {
+            foreach (var user in _userRepository.GetPage(request.Page, request.PageSize).ToArray())
+            {
+                await responseStream.WriteAsync(new User()
+                {
+                    Address = user.Address,
+                    Age = user.Age,
+                    CreateDateTime = Timestamp.FromDateTime(user.CreateDateTime),
+                    Email = user.Email,
+                    UserName = user.UserName
+                }, context.CancellationToken);
+            }
         }
     }
 }
