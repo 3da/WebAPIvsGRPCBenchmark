@@ -5,6 +5,8 @@
 1. Sequenced log writing, including message, importance level, category, timestamp.
 1. Parallel log writing. 
 1. Sequenced sending of files with different sizes.
+1. Parallel sending of files with different sizes.
+1. Parallel getting 1 000 000 users.
 
 ### Это бенчмарк тест, который сравнивает производительность **.Net 7 Web API через HTTP/1.1, HTTP/2.0 и GRPC через HTTP/2.0**.
 
@@ -12,6 +14,8 @@
 1. Последовательная запись лога включая сообщение, уровень важности, категорию, временную метку.
 1. Параллельная запись лога.
 1. Последовательная отправка файлов различного размера.
+1. Параллельная отправка файлов различного размера.
+1. Параллельное получение 1 000 000 пользователей.
 
 BenchmarkDotNet v0.13.6, Windows 10 (10.0.19045.3208/22H2/2022Update)
 
@@ -58,12 +62,66 @@ Job=.NET 7.0  Runtime=.NET 7.0
 | WebApiHttp2Async | 104857600 | 559,644.9 μs |  2,768.52 μs |  2,311.84 μs |  1.05 |    0.01 |      - |      - |      - |  1047.34 KB |      163.49 |
 |    GrpcHttp2Async | 104857600 | 439,736.5 μs | 11,813.59 μs | 34,647.21 μs |  0.82 |    0.07 |      - |      - |      - | 103405.7 KB |   16,141.38 |
 
+### Next tests will not contain Web API though HTTP/2, because this variant showed worse results in previous tests.
+### В следующих тестах не будет Web API через HTTP/2, поскольку этот вариант показал худшие результаты в предыдущих тестах.
+
+## Parallel sending of files. Параллельная отправка файлов
+Изначально в тестах использовался один экземпляр GrpcChannel и один экземпляр HttpClient. Однако в этом случае Grpc сильно проигрывал HttpClient.
+HttpClient по-умолчанию использует несколько подключений.
+
+Чтобы сбалансировать это, теперь используется 8 GrpcChannel и 8 HttpClient. Таким образом теперь оба варианта работают используя несколько подключений.
+
+Initially tests used one instance of GrpcChannel and one instance of HttpClient. But in this case Grpc lost to HttpClient too much. HttpClient uses multiple connections by default.
+
+To balance this, tests now uses 8 instances for both GrpcChannel and HttpClient. So now both variants works using multiple connections.
+
+### Results
+|           Method | FileSize |         Mean |        Error |       StdDev | Ratio | RatioSD |    Gen0 |   Gen1 | Allocated | Alloc Ratio |
+|----------------- |--------- |-------------:|-------------:|-------------:|------:|--------:|--------:|-------:|----------:|------------:|
+| **WebApiHttp1Async** |        **1 KiB** |     **19.71 μs** |     **0.153 μs** |     **0.143 μs** |  **1.00** |    **0.00** |  **0.2930** | **0.0488** |   **5.23 KB** |        **1.00** |
+|   GrpcHttp2Async |        1 KiB |     15.67 μs |     0.176 μs |     0.156 μs |  0.80 |    0.01 |  0.4150 | 0.0732 |   6.89 KB |        1.32 |
+|                  |          |              |              |              |       |         |         |        |           |             |
+| **WebApiHttp1Async** |     **1 MiB** |  **1,046.60 μs** |    **20.608 μs** |    **25.308 μs** |  **1.00** |    **0.00** |       **-** |      **-** |   **5.21 KB** |        **1.00** |
+|   GrpcHttp2Async |     1 MiB |    775.12 μs |    14.932 μs |    13.967 μs |  0.74 |    0.02 |       - |      - |  17.01 KB |        3.26 |
+|                  |          |              |              |              |       |         |         |        |           |             |
+| **WebApiHttp1Async** |    **10 MiB** |  **9,508.82 μs** |    **83.235 μs** |    **69.505 μs** |  **1.00** |    **0.00** |       **-** |      **-** |   **5.38 KB** |        **1.00** |
+|   GrpcHttp2Async |    10 MiB |  9,391.04 μs |   175.910 μs |   172.767 μs |  0.99 |    0.02 |       - |      - | 111.47 KB |       20.72 |
+|                  |          |              |              |              |       |         |         |        |           |             |
+| **WebApiHttp1Async** |   **100 MiB** | **93,453.56 μs** | **1,600.275 μs** | **1,418.602 μs** |  **1.00** |    **0.00** |       **-** |      **-** |   **5.51 KB** |        **1.00** |
+|   GrpcHttp2Async |   100 MiB | 73,216.05 μs | 1,052.733 μs |   984.727 μs |  0.78 |    0.02 | 50.0000 |      - | 1048.7 KB |      190.37 |
+
+## Parallel getting of 1 000 000 users. Параллельное получение 1 000 000 пользователей
+```csharp
+    public class User
+    {
+        public string UserName { get; set; }
+        public string Email { get; set; }
+        public int Age { get; set; }
+        public string Address { get; set; }
+        public DateTime CreateDateTime { get; set; }
+    }
+```
+
+В обоих случаях используется постраничаная загрузка. Все пользователи разбиты на 1000 страниц размером по 1000 пользователей.
+Страницы загружаются и обрабатываются параллельно в 16 потоков. Для каждого потока используется свой интсанс HttpClient или GrpcChannel.
+
+Both cases use paged loading. All users are splitted for 1000 pages by 1000 users.
+Pages are loading and processing parallel in 16 threads. Each thread uses own instance of HtppClient or GrpcChannel.
+
+### Results
+|           Method |     Mean |   Error |  StdDev | Ratio |   Gen0 |   Gen1 |   Gen2 | Allocated | Alloc Ratio |
+|----------------- |---------:|--------:|--------:|------:|-------:|-------:|-------:|----------:|------------:|
+| WebApiHttp1Async | 126.2 μs | 0.01 μs | 0.01 μs |  1.00 | 0.1140 | 0.1140 | 0.1020 |     827 B |        1.00 |
+|   GrpcHttp2Async | 126.2 μs | 0.01 μs | 0.01 μs |  1.00 | 0.0230 | 0.0120 |      - |     389 B |        0.47 |
+
+
 ## Conclusions
 1. Web API through HTTP/2 works slower for all tasks except parallel sending where it shows the same performance as HTTP/1.1.
 1. GRPC is 5% faster than Web API in sending short sequenced requests, like sending log records.
 1. GRPC is 40% faster than Web API in sending short parallel requests.
 1. GRPC is 6% slower than Web API in sequenced sending 1 KiB files.
 1. GRPC is 20-30% faster than Web API in sequenced sending files of 1-100 MiB.
+1. GRPC is 10-25% faster in parallel sending files of 1-100 MiB. But don't forget to use multple GrpcChannel.
 
 Besides this results, it is needed to be taken into account that GRPC uses binary serialization what can be valuable advantage for reducing network traffic. 
 
@@ -73,6 +131,7 @@ Besides this results, it is needed to be taken into account that GRPC uses binar
 1. GRPC на 40% быстрее, чем Web API при отправке коротких параллельных запросов.
 1. GRPC на 6% медленнее, чем Web API при последовательной отправке файлов размером 1 КБ.
 1. GRPC на 20-30% быстрее, чем Web API при последовательной отправке файлов размером 1-100 МБ.
+1. GRPC на 10-25% быстрее в параллельной отправке файлов размером 1-100 МБ. Но не забывайте использовать несколько GrpcChannel.
 
 Кроме приведённых данных нужно учитывать, что GRPC использует бинарную сериализацию, что может быть значительным преимуществом для сокращения сетевого трафика.
 
