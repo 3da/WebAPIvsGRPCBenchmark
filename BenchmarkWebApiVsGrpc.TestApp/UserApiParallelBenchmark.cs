@@ -49,7 +49,6 @@ namespace BenchmarkWebApiVsGrpc.TestApp
                     temp.Add(user.UserName);
                     temp.Add(user.Age);
                 }
-
                 Interlocked.Add(ref result, temp.ToHashCode());
             });
 
@@ -70,16 +69,16 @@ namespace BenchmarkWebApiVsGrpc.TestApp
                     PageSize = PageSize
                 }).ResponseStream.ReadAllAsync();
 
+                var temp = new HashCode();
                 await foreach (var user in users)
                 {
-                    var temp = new HashCode();
                     temp.Add(user.CreateDateTime.ToDateTime());
                     temp.Add(user.Address);
                     temp.Add(user.Email);
                     temp.Add(user.UserName);
                     temp.Add(user.Age);
-                    Interlocked.Add(ref result, temp.ToHashCode());
                 }
+                Interlocked.Add(ref result, temp.ToHashCode());
             });
 
             return result;
